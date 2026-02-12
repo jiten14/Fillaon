@@ -96,7 +96,7 @@ Follow these step-by-step instructions to get Fillaon running on your local mach
 Open your terminal and navigate to the directory where you want to install Fillaon, then run:
 
 ```bash
-git clone <https://github.com/jiten14/Fillaon.git>
+git clone https://github.com/jiten14/Fillaon.git fillaon
 cd fillaon
 ```
 
