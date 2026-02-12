@@ -98,6 +98,10 @@ class GenerateMigration extends Command
                     $line .= "->nullable()";
                 }
                 
+                if (!empty($field['unique'])) {
+                    $line .= "->unique()";
+                }
+                
                 if (isset($field['default']) && $field['default'] !== '' && $field['default'] !== null) {
                     if ($field['type'] === 'boolean') {
                         $line .= "->default(" . ($field['default'] ? 'true' : 'false') . ")";

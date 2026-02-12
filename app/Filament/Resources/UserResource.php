@@ -31,6 +31,10 @@ class UserResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
                     ->email()
+                    ->unique(ignoreRecord: true)
+                    ->validationMessages([
+                        'unique' => 'The :attribute has already been added.',
+                    ])
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')

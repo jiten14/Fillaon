@@ -152,7 +152,13 @@ class Builder extends Page implements HasForms
                                             ->label('Nullable')
                                             ->default(false)
                                             ->inline(false)
-                                            ->columnSpan(2),
+                                            ->columnSpan(1),
+
+                                        Toggle::make('unique')
+                                            ->label('Unique')
+                                            ->default(false)
+                                            ->inline(false)
+                                            ->columnSpan(1),
                                     ]),
                             ])
                             ->columns(1)

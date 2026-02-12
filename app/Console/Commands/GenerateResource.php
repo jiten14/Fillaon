@@ -61,6 +61,14 @@ class GenerateResource extends Command
                 return 1;
             }
 
+            // Add unique validation to form fields if fields are provided
+            if ($fieldsJson) {
+                $fields = json_decode($fieldsJson, true);
+                if ($fields && is_array($fields)) {
+                    $this->addUniqueValidationToFormFields($resourcePath, $fields);
+                }
+            }
+
             // Add table actions - DeleteAction for normal, or Delete/ForceDelete/Restore for soft deletes
             // NOTE: We do NOT add ViewAction here because when --view flag is used,
             // Filament automatically adds ViewAction to the table
@@ -319,6 +327,45 @@ PHP;
         }
         
         return null;
+    }
+
+    /**
+     * Add unique validation to form fields that are marked as unique
+     */
+    protected function addUniqueValidationToFormFields(string $resourcePath, array $fields): bool
+    {
+        try {
+            $content = File::get($resourcePath);
+            
+            // Process each field that has unique flag
+            foreach ($fields as $field) {
+                if (!empty($field['unique']) && !empty($field['name'])) {
+                    $fieldName = $field['name'];
+                    
+                    // Pattern to find the specific field definition
+                    // Match TextInput::make('fieldname') through the end of the field chain
+                    $pattern = "/(TextInput::make\('{$fieldName}'\)(?:.*?))(,\s*\n)/s";
+                    
+                    // Add unique validation with ignoreRecord and custom message
+                    $uniqueValidation = "\n                    ->unique(ignoreRecord: true)\n";
+                    $uniqueValidation .= "                    ->validationMessages([\n";
+                    $uniqueValidation .= "                        'unique' => 'The :attribute has already been added.',\n";
+                    $uniqueValidation .= "                    ])";
+                    
+                    // Replace: add the unique validation before the comma
+                    $replacement = "$1{$uniqueValidation}$2";
+                    $content = preg_replace($pattern, $replacement, $content);
+                }
+            }
+            
+            File::put($resourcePath, $content);
+            $this->info('Unique validation added to form fields');
+            return true;
+            
+        } catch (\Exception $e) {
+            $this->error('Exception in addUniqueValidationToFormFields: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
