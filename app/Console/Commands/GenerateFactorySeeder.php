@@ -203,6 +203,10 @@ class GenerateFactorySeeder extends Command
             return "{$optionalWrapper}name()";
         }
         if (str_contains($fieldNameLower, 'title')) {
+            // For string type titles, use text(100) to ensure it fits
+            if ($fieldType === 'string') {
+                return "{$optionalWrapper}text(100)";
+            }
             return "{$optionalWrapper}sentence(3)";
         }
         if (str_contains($fieldNameLower, 'slug')) {
@@ -215,10 +219,32 @@ class GenerateFactorySeeder extends Command
             return "{$optionalWrapper}imageUrl(640, 480)";
         }
         if (str_contains($fieldNameLower, 'description') || str_contains($fieldNameLower, 'bio')) {
+            // If it's a string type (max 255 chars), use text(200) instead of paragraph()
+            if ($fieldType === 'string') {
+                return "{$optionalWrapper}text(200)";
+            }
             return "{$optionalWrapper}paragraph()";
         }
         if (str_contains($fieldNameLower, 'content') || str_contains($fieldNameLower, 'body')) {
+            // If it's a string type (max 255 chars), use text(200) instead of paragraphs()
+            if ($fieldType === 'string') {
+                return "{$optionalWrapper}text(200)";
+            }
             return "{$optionalWrapper}paragraphs(3, true)";
+        }
+        if (str_contains($fieldNameLower, 'note') || str_contains($fieldNameLower, 'comment') || str_contains($fieldNameLower, 'remark')) {
+            // For notes, comments, remarks - if string type, use text(200)
+            if ($fieldType === 'string') {
+                return "{$optionalWrapper}text(200)";
+            }
+            return "{$optionalWrapper}paragraph()";
+        }
+        if (str_contains($fieldNameLower, 'summary')) {
+            // For summaries - if string type, use text(200)
+            if ($fieldType === 'string') {
+                return "{$optionalWrapper}text(200)";
+            }
+            return "{$optionalWrapper}paragraph()";
         }
         if (str_contains($fieldNameLower, 'color')) {
             return "{$optionalWrapper}hexColor()";
@@ -263,7 +289,9 @@ class GenerateFactorySeeder extends Command
         // Field type-based faker methods (fallback)
         switch ($fieldType) {
             case 'string':
-                return "{$optionalWrapper}sentence(3)";
+                // For generic string fields, use text(200) to stay within 255 char limit
+                // This is safer than sentence(3) which could vary in length
+                return "{$optionalWrapper}text(200)";
             
             case 'text':
             case 'mediumText':
