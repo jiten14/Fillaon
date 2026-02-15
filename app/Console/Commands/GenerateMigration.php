@@ -71,10 +71,25 @@ class GenerateMigration extends Command
             return $b->getMTime() - $a->getMTime();
         });
         
-        // Find migration with the table name
+        // Try multiple variations of the table name
+        $tableVariations = [
+            $tableName,                              // Original plural form
+            Str::singular($tableName),               // Singular form
+            str_replace('_', '', $tableName),        // Without underscores
+        ];
+        
+        // Find migration with any variation of the table name
         foreach ($files as $file) {
-            if (str_contains($file->getFilename(), 'create_' . $tableName . '_table')) {
-                return $file->getPathname();
+            $filename = $file->getFilename();
+            
+            foreach ($tableVariations as $variation) {
+                // Check for both exact match and contains
+                if (str_contains($filename, 'create_' . $variation . '_table') ||
+                    (str_contains($filename, 'create_') && 
+                     str_contains($filename, '_table') && 
+                     str_contains(strtolower($filename), strtolower($variation)))) {
+                    return $file->getPathname();
+                }
             }
         }
         
